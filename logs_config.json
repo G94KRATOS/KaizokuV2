@@ -1,0 +1,50 @@
+{
+  "1019277790018805911": {
+    "moderation": 1431757608464679085,
+    "messages": 1431757609601335516,
+    "members": 1431757610452910111,
+    "roles": 1431757616194781266,
+    "voice": 1431757611996418049,
+    "server": 1431757614655606816,
+    "invites": 1431757617469984899,
+    "giveaways": 1431757619097370695,
+    "boosts": 1431757620334563399,
+    "reactions": 1431757620997263371
+  },
+  "1431645461248475218": {
+    "moderation": 1431752128807964804,
+    "messages": 1431752129684439081,
+    "members": 1431752131073020085,
+    "voice": 1431752132146499675,
+    "server": 1431752133627215925,
+    "roles": 1431752135271387287,
+    "invites": 1431752136164638790,
+    "giveaways": 1431752137162887378,
+    "boosts": 1431752138123509885,
+    "reactions": 1431752146310660107
+  },
+  "1431769801843413155": {
+    "moderation": null,
+    "messages": null,
+    "members": null,
+    "voice": null,
+    "server": null,
+    "roles": null,
+    "invites": null,
+    "giveaways": null,
+    "boosts": null,
+    "reactions": null
+  },
+  "1420469200409071669": {
+    "moderation": null,
+    "messages": null,
+    "members": null,
+    "voice": null,
+    "server": null,
+    "roles": null,
+    "invites": null,
+    "giveaways": null,
+    "boosts": null,
+    "reactions": null
+  }
+}

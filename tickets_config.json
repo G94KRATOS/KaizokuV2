@@ -1,0 +1,66 @@
+{
+  "1431645461248475218": {
+    "category_id": 1431768985816268933,
+    "panel_channel_id": 1431768987771080775,
+    "panel_message_id": 1431768989713039441,
+    "log_channel_id": 1431768986831552622,
+    "support_role_id": 1431700121279791145,
+    "ticket_count": 0,
+    "open_tickets": {},
+    "types": {
+      "support": {
+        "emoji": "\ud83d\udcac",
+        "name": "Support G\u00e9n\u00e9ral",
+        "enabled": true
+      },
+      "report": {
+        "emoji": "\u26a0\ufe0f",
+        "name": "Signalement",
+        "enabled": true
+      },
+      "partnership": {
+        "emoji": "\ud83e\udd1d",
+        "name": "Partenariat",
+        "enabled": true
+      },
+      "other": {
+        "emoji": "\ud83d\udcdd",
+        "name": "Autre",
+        "enabled": true
+      }
+    }
+  },
+  "1019277790018805911": {
+    "category_id": 1431768094941909085,
+    "panel_channel_id": 1431768102861017099,
+    "panel_message_id": 1431768103875907737,
+    "log_channel_id": 1431768096166645830,
+    "support_role_id": null,
+    "ticket_count": 1,
+    "open_tickets": {
+      "1265358641578639421": 1431768309153665054
+    },
+    "types": {
+      "support": {
+        "emoji": "\ud83d\udcac",
+        "name": "Support G\u00e9n\u00e9ral",
+        "enabled": true
+      },
+      "report": {
+        "emoji": "\u26a0\ufe0f",
+        "name": "Signalement",
+        "enabled": true
+      },
+      "partnership": {
+        "emoji": "\ud83e\udd1d",
+        "name": "Partenariat",
+        "enabled": true
+      },
+      "other": {
+        "emoji": "\ud83d\udcdd",
+        "name": "Autre",
+        "enabled": true
+      }
+    }
+  }
+}
