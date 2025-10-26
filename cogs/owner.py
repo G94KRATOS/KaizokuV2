@@ -3,7 +3,6 @@ from discord.ext import commands
 from datetime import datetime
 import aiohttp
 import asyncio
-import io
 
 class Owner(commands.Cog):
     """Commandes avancées pour les Owner Bot (niveau 5)"""
@@ -11,9 +10,9 @@ class Owner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         # ID de ton serveur support
-        self.SUPPORT_SERVER_ID = 1431645461248475218  # ⚠️ REMPLACE PAR L'ID DE TON SERVEUR
+        self.SUPPORT_SERVER_ID = 1431645461248475218
         # ID du salon de logs dans ton serveur support
-        self.LOG_CHANNEL_ID = 1431797410270810182  # ⚠️ REMPLACE PAR L'ID DU SALON DE LOGS
+        self.LOG_CHANNEL_ID = 1431797410270810182
     
     def get_perms_cog(self):
         """Récupère le cog de permissions"""
@@ -22,26 +21,22 @@ class Owner(commands.Cog):
     async def log_owner_action(self, ctx, action: str, details: dict = None, color: discord.Color = discord.Color.blue()):
         """Envoie un log dans le serveur support"""
         try:
-            # Récupère le salon de logs
             log_channel = self.bot.get_channel(self.LOG_CHANNEL_ID)
             if not log_channel:
                 return
             
-            # Création de l'embed
             embed = discord.Embed(
                 title=f"🔔 {action}",
                 color=color,
                 timestamp=datetime.utcnow()
             )
             
-            # Informations de l'utilisateur
             embed.add_field(
                 name="👤 Exécuté par",
                 value=f"{ctx.author.mention}\n`{ctx.author}` (`{ctx.author.id}`)",
                 inline=True
             )
             
-            # Serveur d'origine
             if ctx.guild:
                 embed.add_field(
                     name="🌐 Serveur",
@@ -49,20 +44,14 @@ class Owner(commands.Cog):
                     inline=True
                 )
             else:
-                embed.add_field(
-                    name="🌐 Serveur",
-                    value="DM",
-                    inline=True
-                )
+                embed.add_field(name="🌐 Serveur", value="DM", inline=True)
             
-            # Commande utilisée
             embed.add_field(
                 name="⚙️ Commande",
                 value=f"`{ctx.message.content}`",
                 inline=False
             )
             
-            # Détails supplémentaires
             if details:
                 for key, value in details.items():
                     embed.add_field(name=key, value=value, inline=True)
@@ -79,20 +68,14 @@ class Owner(commands.Cog):
     # GESTION DU STATUT
     # ======================
     
-    @commands.command(name="botstatus", aliases=["changestatus"])
+    @commands.command(name="botstatus", aliases=["changestatus", "setstatus"])
     async def set_status(self, ctx, activity_type: str, *, text: str):
-        """Change le statut du bot - Nécessite Owner Bot (5)
-        Types: playing, watching, listening, streaming, competing
-        Exemple: +botstatus playing Minecraft
-                 +botstatus watching YouTube
-                 +botstatus listening Spotify"""
+        """Change le statut du bot - Owner Bot (5)
+        Types: playing, watching, listening, streaming, competing"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
-        
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
         activity_type = activity_type.lower()
         
@@ -100,29 +83,15 @@ class Owner(commands.Cog):
             if activity_type in ["playing", "play", "game"]:
                 activity = discord.Game(name=text)
             elif activity_type in ["watching", "watch"]:
-                activity = discord.Activity(
-                    type=discord.ActivityType.watching,
-                    name=text
-                )
+                activity = discord.Activity(type=discord.ActivityType.watching, name=text)
             elif activity_type in ["listening", "listen"]:
-                activity = discord.Activity(
-                    type=discord.ActivityType.listening,
-                    name=text
-                )
+                activity = discord.Activity(type=discord.ActivityType.listening, name=text)
             elif activity_type in ["streaming", "stream"]:
-                activity = discord.Streaming(
-                    name=text,
-                    url="https://twitch.tv/discord"
-                )
+                activity = discord.Streaming(name=text, url="https://twitch.tv/discord")
             elif activity_type in ["competing", "compete"]:
-                activity = discord.Activity(
-                    type=discord.ActivityType.competing,
-                    name=text
-                )
+                activity = discord.Activity(type=discord.ActivityType.competing, name=text)
             else:
-                return await ctx.send(
-                    "❌ Type invalide. Utilisez: `playing`, `watching`, `listening`, `streaming`, `competing`"
-                )
+                return await ctx.send("❌ Type invalide: `playing`, `watching`, `listening`, `streaming`, `competing`")
             
             await self.bot.change_presence(activity=activity)
             
@@ -132,35 +101,19 @@ class Owner(commands.Cog):
                 color=discord.Color.green()
             )
             await ctx.send(embed=embed)
-            
-            # Log l'action
-            await self.log_owner_action(
-                ctx,
-                "Statut du Bot Modifié",
-                {
-                    "📝 Type": activity_type.capitalize(),
-                    "💬 Texte": text
-                },
-                discord.Color.blue()
-            )
+            await self.log_owner_action(ctx, "Statut Modifié", {"📝 Type": activity_type, "💬 Texte": text}, discord.Color.blue())
             
         except Exception as e:
             await ctx.send(f"❌ Erreur : {e}")
     
     @commands.command(name="botstatustype", aliases=["setonline"])
     async def set_status_type(self, ctx, status_type: str):
-        """Change le type de statut - Nécessite Owner Bot (5)
-        Types: online, idle, dnd, invisible
-        Exemple: +botstatustype online"""
+        """Change le type de statut - Owner Bot (5)
+        Types: online, idle, dnd, invisible"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
-        
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
-        
-        status_type = status_type.lower()
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
         status_map = {
             "online": discord.Status.online,
@@ -169,362 +122,247 @@ class Owner(commands.Cog):
             "invisible": discord.Status.invisible
         }
         
-        if status_type not in status_map:
-            return await ctx.send("❌ Type invalide. Utilisez: `online`, `idle`, `dnd`, `invisible`")
+        if status_type.lower() not in status_map:
+            return await ctx.send("❌ Type invalide: `online`, `idle`, `dnd`, `invisible`")
         
         try:
-            await self.bot.change_presence(status=status_map[status_type])
-            
-            embed = discord.Embed(
-                title="✅ Type de statut modifié",
-                description=f"Statut: **{status_type}**",
-                color=discord.Color.green()
-            )
-            await ctx.send(embed=embed)
-            
-            # Log l'action
-            await self.log_owner_action(
-                ctx,
-                "Type de Statut Modifié",
-                {
-                    "🟢 Nouveau statut": status_type.upper()
-                },
-                discord.Color.green()
-            )
-            
+            await self.bot.change_presence(status=status_map[status_type.lower()])
+            await ctx.send(f"✅ Statut changé: **{status_type}**")
+            await self.log_owner_action(ctx, "Type Statut Modifié", {"🟢 Statut": status_type.upper()}, discord.Color.green())
         except Exception as e:
             await ctx.send(f"❌ Erreur : {e}")
     
     # ======================
-    # GESTION DU PSEUDO/AVATAR
+    # GESTION PSEUDO/AVATAR
     # ======================
     
     @commands.command(name="botname", aliases=["changename"])
     async def set_bot_name(self, ctx, *, name: str):
-        """Change le nom du bot - Nécessite Owner Bot (5)"""
+        """Change le nom du bot - Owner Bot (5)"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
-        
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
         try:
             old_name = self.bot.user.name
             await self.bot.user.edit(username=name)
             
             embed = discord.Embed(
-                title="✅ Nom du bot modifié",
+                title="✅ Nom modifié",
                 description=f"**{old_name}** → **{name}**",
                 color=discord.Color.green()
             )
-            embed.set_footer(text="Limite: 2 changements par heure")
+            embed.set_footer(text="Limite: 2 changements/heure")
             await ctx.send(embed=embed)
-            
-            # Log l'action
-            await self.log_owner_action(
-                ctx,
-                "Nom du Bot Modifié",
-                {
-                    "📛 Ancien nom": old_name,
-                    "✨ Nouveau nom": name
-                },
-                discord.Color.gold()
-            )
-            
+            await self.log_owner_action(ctx, "Nom Bot Modifié", {"📛 Ancien": old_name, "✨ Nouveau": name}, discord.Color.gold())
         except discord.HTTPException as e:
             await ctx.send(f"❌ Erreur : {e}")
     
     @commands.command(name="botavatar", aliases=["changeavatar"])
     async def set_bot_avatar(self, ctx, url: str = None):
-        """Change l'avatar du bot - Nécessite Owner Bot (5)
-        Exemple: +botavatar [lien image]
-        Ou envoyer une image avec la commande"""
+        """Change l'avatar du bot - Owner Bot (5)"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
-        
-        # Récupère l'image depuis l'attachement ou l'URL
         if ctx.message.attachments:
             url = ctx.message.attachments[0].url
         elif not url:
-            return await ctx.send("❌ Veuillez fournir une URL d'image ou attacher une image.")
+            return await ctx.send("❌ Fournissez une URL ou attachez une image.")
         
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as resp:
                     if resp.status != 200:
                         return await ctx.send("❌ Impossible de télécharger l'image.")
-                    
                     avatar_bytes = await resp.read()
                     await self.bot.user.edit(avatar=avatar_bytes)
             
-            embed = discord.Embed(
-                title="✅ Avatar du bot modifié",
-                color=discord.Color.green()
-            )
+            embed = discord.Embed(title="✅ Avatar modifié", color=discord.Color.green())
             embed.set_thumbnail(url=self.bot.user.display_avatar.url)
             await ctx.send(embed=embed)
-            
-            # Log l'action avec l'image
-            await self.log_owner_action(
-                ctx,
-                "Avatar du Bot Modifié",
-                {
-                    "🖼️ Nouvel avatar": f"[Voir l'image]({self.bot.user.display_avatar.url})"
-                },
-                discord.Color.purple()
-            )
-            
-        except discord.HTTPException as e:
-            await ctx.send(f"❌ Erreur : {e}")
+            await self.log_owner_action(ctx, "Avatar Bot Modifié", {}, discord.Color.purple())
         except Exception as e:
-            await ctx.send(f"❌ Erreur lors du téléchargement : {e}")
-  
+            await ctx.send(f"❌ Erreur : {e}")
     
     # ======================
-    # GESTION DES BLACKLISTS
+    # BLACKLISTS
     # ======================
     
-    @commands.command(name="blserver", aliases=["blserver"])
+    @commands.command(name="bls", aliases=["blserv", "blserver"])
     async def blacklist_server(self, ctx, guild_id: int, *, reason: str = "Aucune raison"):
-        """Blacklist un serveur et le quitte - Nécessite Owner Bot (5)"""
+        """Blacklist un serveur - Owner Bot (5)"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
-        
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
         guild = self.bot.get_guild(guild_id)
-        
         if not guild:
             return await ctx.send(f"❌ Serveur `{guild_id}` introuvable.")
         
         guild_name = guild.name
         guild_members = guild.member_count
         
+        if not hasattr(self.bot, 'blacklisted_servers'):
+            self.bot.blacklisted_servers = []
+        
+        if guild_id not in self.bot.blacklisted_servers:
+            self.bot.blacklisted_servers.append(guild_id)
+        
         try:
             await guild.leave()
-            
             embed = discord.Embed(
                 title="🚫 Serveur blacklisté",
-                description=f"**{guild_name}** (`{guild_id}`) a été blacklisté et quitté.",
+                description=f"**{guild_name}** (`{guild_id}`) quitté.",
                 color=discord.Color.red()
             )
             embed.add_field(name="Raison", value=reason, inline=False)
             await ctx.send(embed=embed)
-            
-            # Log l'action
-            await self.log_owner_action(
-                ctx,
-                "⛔ Serveur Blacklisté",
-                {
-                    "🏷️ Nom du serveur": guild_name,
-                    "🆔 ID": str(guild_id),
-                    "👥 Membres": str(guild_members),
-                    "📋 Raison": reason
-                },
-                discord.Color.red()
-            )
-            
+            await self.log_owner_action(ctx, "⛔ Serveur Blacklisté", 
+                {"🏷️ Nom": guild_name, "🆔 ID": str(guild_id), "👥 Membres": str(guild_members), "📋 Raison": reason},
+                discord.Color.red())
         except Exception as e:
             await ctx.send(f"❌ Erreur: {e}")
     
-    @commands.command(name="bl", aliases=["bluser"])
-    async def blacklist_user(self, ctx, user_id: int, *, reason: str = "Aucune raison"):
-        """Blacklist un utilisateur (empêche d'utiliser le bot) - Nécessite Owner Bot (5)"""
+    @commands.command(name="unbls", aliases=["unblserv"])
+    async def unblacklist_server(self, ctx, guild_id: int):
+        """Retire un serveur de la blacklist - Owner Bot (5)"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
+        if not hasattr(self.bot, 'blacklisted_servers'):
+            self.bot.blacklisted_servers = []
+        
+        if guild_id not in self.bot.blacklisted_servers:
+            return await ctx.send(f"❌ Serveur `{guild_id}` non blacklisté.")
+        
+        self.bot.blacklisted_servers.remove(guild_id)
+        await ctx.send(f"✅ Serveur `{guild_id}` retiré de la blacklist.")
+        await self.log_owner_action(ctx, "✅ Serveur Déblacklisté", {"🆔 ID": str(guild_id)}, discord.Color.green())
+    
+    @commands.command(name="bl", aliases=["bluser", "blu"])
+    async def blacklist_user(self, ctx, user_id: int, *, reason: str = "Aucune raison"):
+        """Blacklist un utilisateur - Owner Bot (5)"""
+        
+        perms_cog = self.get_perms_cog()
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
+        
+        if not hasattr(self.bot, 'blacklisted_users'):
+            self.bot.blacklisted_users = []
+        
+        if user_id in self.bot.blacklisted_users:
+            return await ctx.send(f"❌ Utilisateur `{user_id}` déjà blacklisté.")
+        
+        self.bot.blacklisted_users.append(user_id)
         
         try:
             user = await self.bot.fetch_user(user_id)
-            
             embed = discord.Embed(
                 title="🚫 Utilisateur blacklisté",
                 description=f"**{user}** (`{user_id}`) ne peut plus utiliser le bot.",
                 color=discord.Color.red()
             )
             embed.add_field(name="Raison", value=reason, inline=False)
-            embed.set_footer(text="Note: Fonctionnalité à implémenter dans le système de permissions")
             await ctx.send(embed=embed)
-            
-            # Log l'action
-            await self.log_owner_action(
-                ctx,
-                "⛔ Utilisateur Blacklisté",
-                {
-                    "👤 Utilisateur": f"{user} (`{user.id}`)",
-                    "📋 Raison": reason
-                },
-                discord.Color.red()
-            )
-            
+            await self.log_owner_action(ctx, "⛔ Utilisateur Blacklisté", {"👤 User": f"{user} (`{user.id}`)", "📋 Raison": reason}, discord.Color.red())
         except Exception as e:
             await ctx.send(f"❌ Erreur: {e}")
     
-    
-    # ======================
-    # STATISTIQUES AVANCÉES
-    # ======================
-    
-    @commands.command(name="ownerinfo", aliases=["botinfo"])
-    async def owner_info(self, ctx):
-        """Affiche les statistiques complètes du bot - Nécessite Owner Bot (5)"""
+    @commands.command(name="unbl", aliases=["unbluser"])
+    async def unblacklist_user(self, ctx, user_id: int):
+        """Retire un utilisateur de la blacklist - Owner Bot (5)"""
         
         perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
         
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
+        if not hasattr(self.bot, 'blacklisted_users'):
+            self.bot.blacklisted_users = []
         
-        # Statistiques Discord
+        if user_id not in self.bot.blacklisted_users:
+            return await ctx.send(f"❌ Utilisateur `{user_id}` non blacklisté.")
+        
+        self.bot.blacklisted_users.remove(user_id)
+        
+        try:
+            user = await self.bot.fetch_user(user_id)
+            await ctx.send(f"✅ **{user}** peut à nouveau utiliser le bot.")
+            await self.log_owner_action(ctx, "✅ Utilisateur Déblacklisté", {"👤 User": f"{user} (`{user.id}`)"}, discord.Color.green())
+        except Exception as e:
+            await ctx.send(f"❌ Erreur: {e}")
+    
+    @commands.command(name="blacklist", aliases=["blacklists"])
+    async def show_blacklist(self, ctx):
+        """Affiche les blacklists - Owner Bot (5)"""
+        
+        perms_cog = self.get_perms_cog()
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
+        
+        if not hasattr(self.bot, 'blacklisted_servers'):
+            self.bot.blacklisted_servers = []
+        if not hasattr(self.bot, 'blacklisted_users'):
+            self.bot.blacklisted_users = []
+        
+        embed = discord.Embed(title="🚫 Blacklists", color=discord.Color.red())
+        
+        if self.bot.blacklisted_servers:
+            servers = "\n".join([f"`{sid}`" for sid in self.bot.blacklisted_servers])
+            embed.add_field(name=f"🌐 Serveurs ({len(self.bot.blacklisted_servers)})", value=servers, inline=False)
+        else:
+            embed.add_field(name="🌐 Serveurs", value="Aucun", inline=False)
+        
+        if self.bot.blacklisted_users:
+            users_list = []
+            for uid in self.bot.blacklisted_users[:10]:
+                try:
+                    user = await self.bot.fetch_user(uid)
+                    users_list.append(f"**{user}** (`{uid}`)")
+                except:
+                    users_list.append(f"`{uid}`")
+            embed.add_field(name=f"👤 Utilisateurs ({len(self.bot.blacklisted_users)})", value="\n".join(users_list), inline=False)
+            if len(self.bot.blacklisted_users) > 10:
+                embed.set_footer(text=f"Limité à 10/{len(self.bot.blacklisted_users)}")
+        else:
+            embed.add_field(name="👤 Utilisateurs", value="Aucun", inline=False)
+        
+        await ctx.send(embed=embed)
+    
+    # ======================
+    # STATISTIQUES
+    # ======================
+    
+    @commands.command(name="ownerinfo", aliases=["botinfo", "stats"])
+    async def owner_info(self, ctx):
+        """Stats complètes du bot - Owner Bot (5)"""
+        
+        perms_cog = self.get_perms_cog()
+        if not perms_cog or perms_cog.get_user_level(ctx.author) < 5:
+            return await ctx.send("❌ Nécessite le niveau **Owner Bot** (5).")
+        
         total_members = sum(g.member_count for g in self.bot.guilds)
         total_channels = sum(len(g.channels) for g in self.bot.guilds)
-        total_text = sum(len(g.text_channels) for g in self.bot.guilds)
-        total_voice = sum(len(g.voice_channels) for g in self.bot.guilds)
         
-        embed = discord.Embed(
-            title="📊 Statistiques complètes du bot",
-            color=discord.Color.gold(),
-            timestamp=datetime.utcnow()
-        )
-        
-        embed.add_field(
-            name="🌐 Serveurs",
-            value=f"```yaml\nTotal: {len(self.bot.guilds)}\nMoyenne: {total_members // len(self.bot.guilds) if self.bot.guilds else 0} membres/serveur```",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="👥 Utilisateurs",
-            value=f"```yaml\nTotal: {total_members:,}\nUniques: {len(self.bot.users):,}```",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="📝 Salons",
-            value=f"```yaml\nTotal: {total_channels}\nTexte: {total_text}\nVocaux: {total_voice}```",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="⚙️ Commandes",
-            value=f"```yaml\nTotal: {len(list(self.bot.walk_commands()))}\nCogs: {len(self.bot.cogs)}```",
-            inline=True
-        )
-        
-        embed.add_field(
-            name="🔗 Connexion",
-            value=f"```yaml\nLatence: {round(self.bot.latency * 1000)}ms\nStatut: Connecté```",
-            inline=True
-        )
-        
-        # Uptime
-        if hasattr(self.bot, 'uptime'):
-            uptime_seconds = int((datetime.utcnow() - self.bot.uptime).total_seconds())
-            days = uptime_seconds // 86400
-            hours = (uptime_seconds % 86400) // 3600
-            minutes = (uptime_seconds % 3600) // 60
-            
-            uptime_str = []
-            if days > 0:
-                uptime_str.append(f"{days}j")
-            if hours > 0:
-                uptime_str.append(f"{hours}h")
-            if minutes > 0:
-                uptime_str.append(f"{minutes}m")
-            
-            embed.add_field(
-                name="⏱️ Uptime",
-                value=f"```yaml\n{' '.join(uptime_str) if uptime_str else '< 1m'}```",
-                inline=True
-            )
-        
-        # Système (si psutil disponible)
-        try:
-            import psutil
-            process = psutil.Process()
-            memory_usage = process.memory_info().rss / 1024 / 1024  # MB
-            cpu_usage = process.cpu_percent()
-            
-            embed.add_field(
-                name="💻 Ressources",
-                value=f"```yaml\nRAM: {memory_usage:.2f} MB\nCPU: {cpu_usage}%```",
-                inline=False
-            )
-        except ImportError:
-            pass
+        embed = discord.Embed(title="📊 Statistiques Bot", color=discord.Color.gold())
+        embed.add_field(name="🌐 Serveurs", value=f"```yaml\n{len(self.bot.guilds)}```", inline=True)
+        embed.add_field(name="👥 Utilisateurs", value=f"```yaml\n{total_members:,}```", inline=True)
+        embed.add_field(name="📝 Salons", value=f"```yaml\n{total_channels}```", inline=True)
+        embed.add_field(name="⚙️ Commandes", value=f"```yaml\n{len(list(self.bot.walk_commands()))}```", inline=True)
+        embed.add_field(name="🔗 Latence", value=f"```yaml\n{round(self.bot.latency * 1000)}ms```", inline=True)
+        embed.add_field(name="📦 Cogs", value=f"```yaml\n{len(self.bot.cogs)}```", inline=True)
         
         embed.set_thumbnail(url=self.bot.user.display_avatar.url)
-        embed.set_footer(text=f"Bot ID: {self.bot.user.id}")
-        
         await ctx.send(embed=embed)
-        
-        # Log l'action
-        await self.log_owner_action(
-            ctx,
-            "📊 Statistiques Consultées",
-            {
-                "📈 Serveurs": str(len(self.bot.guilds)),
-                "👥 Utilisateurs": f"{total_members:,}"
-            },
-            discord.Color.blue()
-        )
-    
-    # ======================
-    # MAINTENANCE
-    # ======================
-    
-    @commands.command(name="maintenance")
-    async def toggle_maintenance(self, ctx):
-        """Active/désactive le mode maintenance - Nécessite Owner Bot (5)"""
-        
-        perms_cog = self.get_perms_cog()
-        if not perms_cog:
-            return await ctx.send("❌ Système de permissions non chargé.")
-        
-        if perms_cog.get_user_level(ctx.author) < 5:
-            return await ctx.send("❌ Cette commande nécessite le niveau **Owner Bot** (5).")
-        
-        # Toggle maintenance mode
-        if not hasattr(self.bot, 'maintenance_mode'):
-            self.bot.maintenance_mode = False
-        
-        self.bot.maintenance_mode = not self.bot.maintenance_mode
-        
-        status = "activé" if self.bot.maintenance_mode else "désactivé"
-        color = discord.Color.orange() if self.bot.maintenance_mode else discord.Color.green()
-        
-        embed = discord.Embed(
-            title=f"🔧 Mode maintenance {status}",
-            description="Le bot est maintenant en maintenance." if self.bot.maintenance_mode else "Le bot est de nouveau opérationnel.",
-            color=color
-        )
-        await ctx.send(embed=embed)
-        
-        # Log l'action
-        await self.log_owner_action(
-            ctx,
-            f"🔧 Mode Maintenance {'Activé' if self.bot.maintenance_mode else 'Désactivé'}",
-            {
-                "⚙️ Statut": "EN MAINTENANCE" if self.bot.maintenance_mode else "OPÉRATIONNEL"
-            },
-            discord.Color.orange() if self.bot.maintenance_mode else discord.Color.green()
-        )
 
 async def setup(bot):
     await bot.add_cog(Owner(bot))
-    print("✅ Cog Owner chargé avec succès")
+
+async def teardown(bot):
+    """Appelé lors du déchargement du cog"""
+    pass
